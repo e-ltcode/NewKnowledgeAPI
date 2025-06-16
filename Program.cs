@@ -109,8 +109,8 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddResponseCaching();
 
-builder.Services.AddSingleton<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
-builder.Services.AddSingleton<IVectorSearchService, VectorSearchService>();
+//builder.Services.AddSingleton<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
+//builder.Services.AddSingleton<IVectorSearchService, VectorSearchService>();
 
 var app = builder.Build();
 
@@ -139,8 +139,11 @@ app.UseAuthentication();
 //app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 
-var vectorSearchService = app.Services.GetRequiredService<IVectorSearchService>();
-await vectorSearchService.InitializeAsync();
+// ----------------------------------------------------------------------------------
+// Djole, kreiracemo posebnu granu za VectorSearch
+// var vectorSearchService = app.Services.GetRequiredService<IVectorSearchService>();
+// await vectorSearchService.InitializeAsync();
+// ----------------------------------------------------------------------------------
 
 app.MapControllers();
 

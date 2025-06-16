@@ -1,3 +1,4 @@
+using Knowledge.Services;
 using Microsoft.Azure.Cosmos;
 using NewKnowledgeAPI.Models;
 
@@ -53,18 +54,19 @@ namespace NewKnowledgeAPI.Services
                 {
                     Id = _containerId,
                     PartitionKeyPath = "/partitionKey",
-                    VectorIndexingPolicy = new VectorIndexingPolicy
-                    {
-                        VectorIndexes = new List<VectorIndex>
-                        {
-                            new VectorIndex
-                            {
-                                Path = "/embedding",
-                                Type = VectorIndexType.COSMOS_DOT_PRODUCT,
-                                Dimensions = _embeddingDimension
-                            }
-                        }
-                    }
+                    // TODO Slavko commented out
+                    //VectorIndexingPolicy = new VectorIndexingPolicy
+                    //{
+                    //    VectorIndexes = new List<VectorIndex>
+                    //    {
+                    //        new VectorIndex
+                    //        {
+                    //            Path = "/embedding",
+                    //            Type = VectorIndexType.COSMOS_DOT_PRODUCT,
+                    //            Dimensions = _embeddingDimension
+                    //        }
+                    //    }
+                    //}
                 };
                 await container.ReplaceContainerAsync(containerProperties);
                 _logger.LogInformation("Vector search container initialized successfully");
