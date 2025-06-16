@@ -65,7 +65,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             Level = level;
             Kind = kind;
             HasSubCategories = hasSubCategories;
-            SubCategories = subCategories.Select(c => new CategoryRow(c)).ToList();
+            SubCategories = subCategories; //.Select(c => new CategoryRow(c)).ToList();
             HasMoreQuestions = hasMoreQuestions;
             NumOfQuestions = numOfQuestions;
             QuestionRows = questionRows;

@@ -31,7 +31,8 @@ namespace NewKnowledgeAPI.Q.Categories
 
 
         [HttpGet]
-        [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any)]
+        // TODO uncomment after testing
+        //[ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllCategoryRows()
         {
             try
@@ -50,7 +51,8 @@ namespace NewKnowledgeAPI.Q.Categories
 
 
         [HttpGet("{partitionKey}/{id}")]
-        [ResponseCache(Duration = 12, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id" })]
+        // TODO uncomment after testing
+        //[ResponseCache(Duration = 12, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id" })]
         public async Task<IActionResult> GetSubCategories(string partitionKey, string id)
         {
             try
@@ -86,7 +88,7 @@ namespace NewKnowledgeAPI.Q.Categories
 
         [HttpGet("{partitionKey}/{id}/{upTheTree}")]
         [ResponseCache(Duration = 12, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id", "upTheTre" })]
-        public async Task<IActionResult> GetCategorRowsUpTheTree(string partitionKey, string id, bool upTheTree)
+        public async Task<IActionResult> GetCategoryRowsUpTheTree(string partitionKey, string id, string upTheTree)
         {
             try
             {
@@ -107,6 +109,32 @@ namespace NewKnowledgeAPI.Q.Categories
         }
 
 
- 
+        [HttpGet("{partitionKey}/{id}/{hidrate}/{pageSize}/{includeQuestionId}")]
+        //[ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id" })]
+        public async Task<IActionResult> GetCategoryRow(string partitionKey, string id, bool hidrate, int pageSize, string? includeQuestionId)
+        {
+            try
+            {
+                CategoryKey categoryKey = new(partitionKey, id);
+                // one fine day use this style
+                //using (var db = new Db(this.Configuration)) {}
+
+                var categoryRowService = new CategoryRowService(dbService);
+                CategoryRowDtoEx categoryRowDtoEx = await categoryRowService.GetCategoryRow(categoryKey, hidrate, pageSize, includeQuestionId);
+                if (categoryRowDtoEx.categoryRowDto != null)
+                {
+                    return Ok(categoryRowDtoEx);
+                }
+                return NotFound(categoryRowDtoEx);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+
     }
 }

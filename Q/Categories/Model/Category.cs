@@ -32,7 +32,8 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         public bool HasSubCategories { get; set; }
 
         [JsonProperty(PropertyName = "SubCategories", NullValueHandling = NullValueHandling.Ignore)]
-        public List<Category>? SubCategories {  get; set; }
+        //public List<Category>? SubCategories {  get; set; }
+        public List<CategoryRow>? SubCategories { get; set; }
 
         [JsonProperty(PropertyName = "Questions", NullValueHandling = NullValueHandling.Ignore)]
         public List<QuestionRow>? QuestionRows { get; set; }
@@ -114,7 +115,8 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             out int level, 
             out int kind,
             out bool hasSubCategories,
-            out List<Category> subCategories,
+            //out List<Category> subCategories,
+            out List<CategoryRow> subCategories,
             out bool? hasMoreQuestions,
             out int numOfQuestions,
             out List<QuestionRow>? questionRows,

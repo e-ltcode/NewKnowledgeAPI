@@ -89,27 +89,23 @@ namespace NewKnowledgeAPI.Q.Categories
             return subCategorRows;
         }
 
-        public async Task<CategoryRowEx> GetCategoryWithSubCategories(Container container, CategoryKey categoryKey, bool hidrate)
+        public async Task<CategoryRowEx> GetCategoryRowWithSubCategories(Container container, CategoryKey categoryKey, bool hidrate)
         {
             var (PartitionKey, Id) = categoryKey;
             try
             {
                 Category category = await container!.ReadItemAsync<Category>(Id, new PartitionKey(PartitionKey));
                 var categoryRow = new CategoryRow(category);
-                List<CategoryRow> subCategories = [];
-                if (hidrate)
-                {
-                    subCategories = await GetSubCategoryRows(container, PartitionKey, Id);
-                    // bio neki []
-                }
-                categoryRow.SubCategories = subCategories;
+                categoryRow.SubCategories = hidrate 
+                    ? await GetSubCategoryRows(container, PartitionKey, Id)
+                    : [];
                 return new CategoryRowEx(categoryRow, "");
             }
             catch (Exception ex)
             {
                 // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
-                Debug.WriteLine(ex.Message);
-                return new CategoryRowEx(null, ex.Message);
+                Console.WriteLine(ex.Message);
+                return new CategoryRowEx((CategoryRow?)null, ex.Message);
             }
         }
 
@@ -126,7 +122,7 @@ namespace NewKnowledgeAPI.Q.Categories
                 do
                 {
                     bool hidrate = categoryRow != null; // do not hidrate row at the bottom
-                    CategoryRowEx categoryRowEx = await GetCategoryWithSubCategories(myContainer, categoryKey, hidrate);
+                    CategoryRowEx categoryRowEx = await GetCategoryRowWithSubCategories(myContainer, categoryKey, hidrate);
                     // Console.WriteLine("---------------------------------------------------");
                     // Console.WriteLine(JsonConvert.SerializeObject(categoryEx)); 
                     var (catRow, msg) = categoryRowEx;
@@ -163,9 +159,9 @@ namespace NewKnowledgeAPI.Q.Categories
             catch (Exception ex)
             {
                 message = ex.Message;
-                Debug.WriteLine(message);
+                Console.WriteLine(message);
             }
-            return new CategoryRowEx(null, message);
+            return new CategoryRowEx((CategoryRow?)null, message);
         }
 
         void SetRootId(CategoryRow categoryRow, string rootId)
@@ -175,6 +171,92 @@ namespace NewKnowledgeAPI.Q.Categories
             categoryRow.SubCategories.ForEach(c => {
                 SetRootId(c, rootId);
             });
+        }
+
+        /*
+        public async Task<CategoryRowDtoEx> GetCategoryRow(CategoryKey categoryKey)
+        {
+            // used for node collapse
+            var (PartitionKey, Id) = categoryKey;
+            var myContainer = await container();
+            var msg = string.Empty;
+            try
+            {
+                // Read the item to see if it exists.  
+                //ItemResponse<Category> aResponse =
+                Category category = await myContainer!.ReadItemAsync<Category>(Id, new PartitionKey(PartitionKey));
+                //Console.WriteLine(JsonConvert.SerializeObject(category));
+                if (category == null)
+                {
+                    msg = "Not Found Bre";
+                }
+                else
+                {
+                    var categoryRowDto = new CategoryRowDto(new CategoryRow(category));
+                    return new CategoryRowDtoEx(categoryRowDto, "");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
+                Console.WriteLine(ex.Message);
+                msg = ex.Message;
+            }
+            return new CategoryRowDtoEx(null, msg);
+        }
+        */
+
+        public async Task<CategoryRowDtoEx> GetCategoryRow(CategoryKey categoryKey, 
+            bool hidrate, int pageSize, string? includeQuestionId)
+        {
+            // used for node expand
+            var (PartitionKey, Id) = categoryKey;
+            var myContainer = await container();
+            var msg = string.Empty;
+            try
+            {
+                // Read the item to see if it exists.  
+                //ItemResponse<Category> aResponse =
+                Category category = await myContainer!.ReadItemAsync<Category>(Id, new PartitionKey(PartitionKey));
+                //Console.WriteLine(JsonConvert.SerializeObject(category));
+                if (category == null)
+                {
+                    msg = "Not Found Bre";
+                }
+                else
+                {
+                    if (hidrate)
+                    {
+                        ///////////////////
+                        // subCategoryRows
+                        List<CategoryRow> subCategories = await GetSubCategoryRows(myContainer, PartitionKey, Id);
+                        category.SubCategories = subCategories;
+
+                        ///////////////////
+                        // questionsRows
+                        if (pageSize > 0)
+                        {
+                            if (category.NumOfQuestions > 0)
+                            {
+                                var questionService = new QuestionService(Db);
+                                QuestionsMore questionsMore = await questionService.GetQuestions(Id, 0, pageSize, includeQuestionId ?? "null");
+                                category.QuestionRows = questionsMore.QuestionRows/*.Select(questionRow => new Question(questionRow))*/.ToList();
+                                category.HasMoreQuestions = questionsMore.HasMoreQuestions;
+                            }
+                        }
+                    }
+                    var categoryRow = new CategoryRow(category);
+                    var categoryRowDto = new CategoryRowDto(categoryRow);
+                    return new CategoryRowDtoEx(categoryRowDto, "");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Note that after creating the item, we can access the body of the item with the Resource property off the ItemResponse. We can also access the RequestCharge property to see the amount of RUs consumed on this request.
+                Console.WriteLine(ex.Message);
+                msg = ex.Message;
+            }
+            return new CategoryRowDtoEx(null, msg);
         }
 
 

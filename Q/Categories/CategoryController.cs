@@ -1,7 +1,9 @@
 ﻿using Knowledge.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NewKnowledgeAPI.Common;
 using NewKnowledgeAPI.Q.Categories.Model;
+using NewKnowledgeAPI.Q.Questions.Model;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -27,53 +29,15 @@ namespace NewKnowledgeAPI.Q.Categories
         }
 
        
-
-        /*
-        [HttpGet("{partitionKey}/{id}")]
-        //[ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id" })]
-        public async Task<IActionResult> GetSubCategories(string partitionKey, string id)
-        {
-            try
-            {
-                Console.WriteLine("GetSubCategories {0}/{1}", partitionKey, id);
-                //using (var db = new Db(this.Configuration))
-                //{
-                //    await db.Initialize;
-                //var category = new Category(_Db);
-                var categoryRowService = new CategoryRowService(dbService);
-                List<CategoryRow> subCategories = await categoryRowService.GetSubCategories(partitionKey, id);
-                //Console.WriteLine(JsonConvert.SerializeObject(subCategories.Select( c => c.Title).ToList()));
-                subCategories.Sort(CategoryRow.Comparer);
-                //Console.WriteLine(JsonConvert.SerializeObject(subCategories.Select(c => c.Title).ToList()));
-                if (subCategories != null)
-                {
-                    List<CategoryRowDto> list = [];
-                    foreach (CategoryRow cat in subCategories)
-                    {
-                        list.Add(new CategoryRowDto(cat));
-                    }
-                    return Ok(list);
-                }
-                //}
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        */
-
         [HttpGet("{partitionKey}/{id}/{pageSize}/{includeQuestionId}")]
         //[ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id", "pageSize", "includeQuestionId" })]
-        public async Task<IActionResult> GetCategory(string partitionKey, string id, int pageSize, string includeQuestionId)
+        public async Task<IActionResult> GetCategory(string partitionKey, string id, int pageSize, string? includeQuestionId)
         {
             try
             {
                 CategoryKey categoryKey = new (partitionKey, id);
                 Console.WriteLine("GetCategory: {0}, {1}, {2}, {3} \n", partitionKey, id, pageSize, includeQuestionId);
 
-                // TODO 1. ovo 2. what does  /partitionKey mean?
                 //using(var db = new Db(this.Configuration))
                 //{
                 //    await db.Initialize;
@@ -83,10 +47,10 @@ namespace NewKnowledgeAPI.Q.Categories
                 //Category cat = await category.GetCategory(
                 //    partitionKey, id, true, pageSize, includeQuestionId=="null" ? null : includeQuestionId);
                 var categoryService = new CategoryService(dbService);
-                CategoryEx categoryEx = await categoryService.GetCategory(
-                       categoryKey, true, 
+                CategoryEx categoryEx = await categoryService.GetCategoryHidrated(
+                       categoryKey, 
                        pageSize, 
-                       includeQuestionId == "null" ? null : includeQuestionId
+                       includeQuestionId //== "null" ? null : includeQuestionId
                 );
                 if (categoryEx.category != null)
                 {
@@ -114,7 +78,7 @@ namespace NewKnowledgeAPI.Q.Categories
                 //await db.Initialize;
                 //var category = new Category(db);
                 var categoryService = new CategoryService(dbService);
-                CategoryEx categoryEx = await categoryService.GetCategory(categoryKey, hidrate, 0, null);
+                CategoryEx categoryEx = await categoryService.GetCategoryHidrated(categoryKey, 0, null);
                 if (categoryEx.category != null)
                 {
                     return Ok(new CategoryDtoEx(categoryEx));
@@ -128,6 +92,35 @@ namespace NewKnowledgeAPI.Q.Categories
             }
         }
 
+        /*
+        [HttpGet("{partitionKey}/{id}")]
+        //[ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id" })]
+        public async Task<IActionResult> GetCategoryWithSubCategories(string partitionKey, string id)
+        {
+            // hidrate collections except questions
+            try
+            {
+                CategoryKey categoryKey = new(partitionKey, id);
+                // TODO what does  /partitionKey mean?
+                //using (var db = new Db(this.Configuration))
+                //{
+                //await db.Initialize;
+                //var category = new Category(db);
+                var categoryService = new CategoryService(dbService);
+                CategoryEx categoryEx = await categoryService.GetCategoryWithSubCategories(categoryKey);
+                if (categoryEx.category != null)
+                {
+                    return Ok(new CategoryDtoEx(categoryEx));
+                }
+                //}
+                return NotFound(new CategoryDtoEx(categoryEx));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        */
 
         [HttpPost]
         [Authorize]
@@ -159,8 +152,23 @@ namespace NewKnowledgeAPI.Q.Categories
                 Console.WriteLine("===>>> UpdateCategory: {0} \n", categoryDto.Title);
                 var categoryService = new CategoryService(dbService);
                 CategoryEx categoryEx = await categoryService.UpdateCategory(categoryDto);
-                if (categoryEx != null)
+                var (category, msg) = categoryEx;
+                if (category != null)
                 {
+                    if (category.ParentCategory != categoryDto.ParentCategory)
+                    {
+                        // TODO we need to update category questions, too 
+                        // category changed 
+                        /*
+                        await categoryService.UpdateHasSubCategories(
+                            new CategoryKey(categoryDto.PartitionKey, categoryDto.ParentCategory!),
+                            new WhoWhen(categoryDto.Modified!));
+                        await categoryService.UpdateNumOfQuestions(
+                            new CategoryKey(category.PartitionKey, category.ParentCategory!),
+                            category.Modified!,
+                            1);
+                        */
+                    }
                     return Ok(new CategoryDtoEx(categoryEx));
                 }
                 return NotFound(new CategoryDtoEx("Jok Found"));
@@ -181,7 +189,6 @@ namespace NewKnowledgeAPI.Q.Categories
                 Console.WriteLine("===>>> DeleteCategory: {0}/{1} \n", categoryDto.PartitionKey, categoryDto.Id);
                 var categoryService = new CategoryService(dbService);
                 CategoryEx categoryEx = await categoryService.DeleteCategory(categoryDto);
-
                 if (categoryEx.category != null)
                 {
                     return Ok(new CategoryDtoEx(categoryEx));

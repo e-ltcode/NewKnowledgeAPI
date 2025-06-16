@@ -17,7 +17,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         {
 
             categoryRowDto = categoryRowEx.categoryRow != null ? new CategoryRowDto(categoryRowEx.categoryRow!) : null;
-            msg = categoryRowEx.msg!;
+            msg = categoryRowEx.message!;
         }
 
 

@@ -17,29 +17,32 @@ namespace NewKnowledgeAPI.Q.Categories.Model
 
         public int Kind { get; set; }
         public int Level { get; set; }
-        public int NumOfQuestions { get; set; }
         public bool HasSubCategories { get; set; }
+        public List<CategoryRowDto>? SubCategories { get; set; }
+        public int NumOfQuestions { get; set; }
+        public List<QuestionRowDto>? QuestionRowDtos { get; set; }
+
         public string? Link { get; set; }
         public string Header { get; set; }
         public List<string>? Variations { get; set; }
 
-        public List<CategoryRowDto>? SubCategories { get; set; }
         public bool? IsExpanded { get; set; }
 
         public CategoryRowDto(CategoryRow categoryRow)
         {
             var (partitionKey, id, parentCategory, title, link, header, level, kind,
                 hasSubCategories, subCategories,
-                hasMoreQuestions, numOfQuestions, _, variations, isExpanded, rootId) = categoryRow;
+                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId) = categoryRow;
             Id = id;
             PartitionKey = partitionKey;
             Title = title;
             Kind = kind;
             ParentCategory = parentCategory;
             Level = level;
-            NumOfQuestions = numOfQuestions;
             HasSubCategories = hasSubCategories;
-            SubCategories = subCategories.Select(row => new CategoryRowDto(row)).ToList();
+            SubCategories = subCategories.Select(c => new CategoryRowDto(c)).ToList();
+            NumOfQuestions = numOfQuestions;
+            QuestionRowDtos = questionRows != null ? questionRows.Select(q => new QuestionRowDto(q)).ToList(): [];
             Variations = variations ?? [];
             Link = link;
             Header = header;
