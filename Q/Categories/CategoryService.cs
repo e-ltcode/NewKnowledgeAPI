@@ -13,7 +13,7 @@ using System.Net;
 
 namespace NewKnowledgeAPI.Q.Categories
 {
-    public class CategoryService : IDisposable
+    public class CategoryService : CategoryRowService
     {
         public DbService? Db { get; set; } = null;
 
@@ -43,7 +43,7 @@ namespace NewKnowledgeAPI.Q.Categories
         internal async Task<List<CategoryRowDto>> GetAllCats()
         {
             var myContainer = await container();
-            var sqlQuery = "SELECT * FROM c WHERE c.Type = 'category' AND IS_NULL(c.Archived) ORDER BY c.Title ASC";
+            var sqlQuery = "SELECT * FROM c WHERE c.Type = 'category'  ORDER BY c.Title ASC";
             QueryDefinition queryDefinition = new(sqlQuery);
             FeedIterator<Category> queryResultSetIterator = myContainer.GetItemQueryIterator<Category>(queryDefinition);
             //List<CategoryDto> subCategories = new List<CategoryDto>();
@@ -59,7 +59,8 @@ namespace NewKnowledgeAPI.Q.Categories
             return dtos;
         }
         
-        public async Task<CategoryEx> GetCategoryHidrated(CategoryKey categoryKey, int pageSize, string? includeQuestionId)
+
+        public async Task<CategoryEx> GetCategory(CategoryKey categoryKey, bool hidrate, int pageSize, string? includeQuestionId)
         {
             var (PartitionKey, Id) = categoryKey;
             var myContainer = await container();
@@ -72,6 +73,7 @@ namespace NewKnowledgeAPI.Q.Categories
 
                 if (category != null)
                 {
+                    /*
                     /////////////////////
                     //// subCategoryRows
                     //List<CategoryRow> subCategories = await GetSubCategoryRows(myContainer, PartitionKey, Id);
@@ -87,10 +89,11 @@ namespace NewKnowledgeAPI.Q.Categories
                         {
                             var questionService = new QuestionService(Db);
                             QuestionsMore questionsMore = await questionService.GetQuestions(Id, 0, pageSize, includeQuestionId??"null");
-                            category.QuestionRows = questionsMore.QuestionRows/*.Select(questionRow => new Question(questionRow))*/.ToList();
-                            category.HasMoreQuestions = questionsMore.HasMoreQuestions;
+                            category.QuestionRows = questionsMore.QuestionRows.ToList(); // .Select(questionRow => new Question(questionRow))
+                    category.HasMoreQuestions = questionsMore.HasMoreQuestions;
                         }
                     }
+                    */
                 }
                 return new CategoryEx(category, "");
             }
@@ -105,7 +108,7 @@ namespace NewKnowledgeAPI.Q.Categories
         // TODO make CtrlController as the base class for:  CategoryRowController and CategoryController
         internal async Task<List<CategoryRow>> GetSubCategoryRows(Container myContainer, string PartitionKey, string id)
         {
-            var sqlQuery = $"SELECT * FROM c WHERE c.Type = 'category' AND IS_NULL(c.Archived) AND "
+            var sqlQuery = $"SELECT * FROM c WHERE c.Type = 'category'  AND "
             + (
                 id == "null"
                     ? $" IS_NULL(c.ParentCategory)"
@@ -185,7 +188,7 @@ namespace NewKnowledgeAPI.Q.Categories
             try
             {
                 var c = new Category(categoryData);
-                CategoryEx categoryEx = await AddNewCategory(c);
+                CategoryEx categoryEx = await AddNewCategory(myContainer, c);
                 if (categoryEx.category != null)
                 {
                     Category category = categoryEx.category;
@@ -219,14 +222,12 @@ namespace NewKnowledgeAPI.Q.Categories
             }
         }
 
-        public async Task<CategoryEx> AddNewCategory(Category category)
+        public async Task<CategoryEx> AddNewCategory(Container cntr, Category category)
         {
-            //var (PartitionKey, Id, Title, ParentCategory, Kind, Level, Variations, Questions) = category;
             var (partitionKey, id, parentCategory, title, link, header, level, kind,
                 hasSubCategories, subCategories,
                 hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId) = category;
-
-            var myContainer = await container();
+            var myContainer = cntr != null ? cntr : await container();
             string msg = string.Empty;
             try
             {
@@ -277,11 +278,11 @@ namespace NewKnowledgeAPI.Q.Categories
             categoryDto.PartitionKey = categoryDto.Id;
             var myContainer = await container();
             var category = new Category(categoryDto);
-            CategoryEx categoryEx = await AddNewCategory(category);
+            CategoryEx categoryEx = await AddNewCategory(myContainer, category);
 
             // update parentCategory
-            categoryDto.Modified = categoryDto.Modified;
-            await UpdateHasSubCategories(categoryDto);
+            await UpdateHasSubCategories(myContainer, category.ParentCategory, category.Created!.NickName);
+
 
             return categoryEx;
         }
@@ -398,8 +399,6 @@ namespace NewKnowledgeAPI.Q.Categories
             return new CategoryEx(null, msg);
         }
 
-
-
         public async Task<Category> UpdateNumOfQuestions(CategoryKey categoryKey, WhoWhen modified, int incr)
         {
             var ( partitionKey, id ) = categoryKey;
@@ -415,14 +414,10 @@ namespace NewKnowledgeAPI.Q.Categories
                 Category category = aResponse.Resource;
                 
                 // Update the item fields
-                if (incr == 1)
-                    category.NumOfQuestions++;
-                else
-                    category.NumOfQuestions--;
-                category.Modified = new WhoWhen(modified!.NickName); //new WhoWhen(questionDto.Modified!);
-
+                category.NumOfQuestions += incr;
+                category.Modified = new WhoWhen(modified!.NickName);
                 aResponse = await myContainer.ReplaceItemAsync(category, category.Id, new PartitionKey(category.PartitionKey));
-                Console.WriteLine("Updated Category [{0},{1}].\n \tBody is now: {2}\n", category.Title, category.Id, category);
+                Console.WriteLine("===>>> Updated Category NumOfQuestions [{0},{1}].\n", category.Title, category.Id);
                 return category;
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -437,10 +432,9 @@ namespace NewKnowledgeAPI.Q.Categories
             return null;
         }
 
-        public async Task<Category> UpdateHasSubCategories(CategoryDto categoryDto)
+        public async Task<Category> UpdateHasSubCategories(Container cntr, string parentCategory, string who)
         {
-            var (_, _, parentCategory, _, _, _, _, _, modified) = categoryDto;
-            var myContainer = await container();
+            var myContainer = cntr != null ? cntr : await container();
             try
             {
                 var PartitionKey = parentCategory;
@@ -456,12 +450,12 @@ namespace NewKnowledgeAPI.Q.Categories
                 var sql = $"SELECT value count(1) FROM c WHERE c.Type = 'category' " +
                     "AND c.partitionKey='{PartitionKey} " +
                     "AND Parentcategory='{Id}' " + 
-                    "AND IS_NULL(c.Archived)";
+                    "";
                 int num = await CountItems(myContainer, sql);
                 Console.WriteLine($"============================ num: {num}");
 
                 category.HasSubCategories = num > 0;
-                category.Modified = new WhoWhen(modified!.NickName);
+                category.Modified = new WhoWhen(who);
 
                 aResponse = await myContainer.ReplaceItemAsync(category, Id, new PartitionKey(PartitionKey));
                 Console.WriteLine("Updated Category [{0},{1}].\n \tBody is now: {2}\n", category.Title, Id, category);
@@ -469,7 +463,7 @@ namespace NewKnowledgeAPI.Q.Categories
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                Console.WriteLine("Category item {0}/{1} NotFound in database.\n", categoryDto.PartitionKey, categoryDto.Id); //, aResponse.RequestCharge);
+                Console.WriteLine("Category item {0}/{1} NotFound in database.\n", parentCategory, parentCategory); //, aResponse.RequestCharge);
             }
             catch (Exception ex)
             {
@@ -521,18 +515,14 @@ namespace NewKnowledgeAPI.Q.Categories
             return new CategoryEx(null, msg);
         }
 
-        public async Task<CategoryEx> DeleteCategory(CategoryDto categoryDto)
+        public async Task<CategoryEx> ArchiveCategory(Container? cntr, Category c)
         {
-            var myContainer = await container();
+            var myContainer = cntr != null ? cntr : await container();
             string msg = string.Empty;
             try
             {
-
-                var (partitionKey, id, parentCategory, _, _, _, _, _, modified) = categoryDto; 
-                // Read the item to see if it exists.
-
                 ItemResponse<Category> aResponse =
-                    await myContainer!.ReadItemAsync<Category>(id, new PartitionKey(partitionKey));
+                    await myContainer.ReadItemAsync<Category>(c.Id, new PartitionKey(c.PartitionKey));
                 Category category = aResponse.Resource;
                 if (category.HasSubCategories)
                 {
@@ -542,18 +532,26 @@ namespace NewKnowledgeAPI.Q.Categories
                 {
                     return new CategoryEx(null, "HasQuestions");
                 }
-                category.Archived = new WhoWhen(categoryDto.Modified!.NickName);
-                aResponse = await myContainer.ReplaceItemAsync(category, category.Id, new PartitionKey(category.PartitionKey));
-                msg = $"Archived Category {category.PartitionKey}/{category.Id}. {category.Title}";
-                Console.WriteLine(msg);
+                //category.Archived = new WhoWhen(categoryDto.Modified!.NickName);
+                //aResponse = await myContainer.ReplaceItemAsync(category, category.Id, new PartitionKey(category.PartitionKey));
+                //msg = $"Archived Category {category.PartitionKey}/{category.Id}. {category.Title}";
+                //Console.WriteLine(msg);
+                await myContainer.DeleteItemAsync<Category>(
+                        c.Id,
+                        new PartitionKey(c.PartitionKey)
+                    );
+
+                category.PartitionKey = "Archived";
+                category.Type += "_Archived";
+                CategoryEx categoryEx = await AddNewCategory(myContainer, category);
 
                 // update parentCategory
-                await UpdateHasSubCategories(categoryDto);
+                await UpdateHasSubCategories(myContainer, c.ParentCategory, c.Modified!.NickName);
                 return new CategoryEx(aResponse.Resource, "OK");
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                msg =$"Category {categoryDto.Id} NotFound in database."; //, aResponse.RequestCharge);
+                msg =$"Category {c.Id} NotFound in database."; //, aResponse.RequestCharge);
                 Console.WriteLine(msg);
             }
             catch (Exception ex)

@@ -16,8 +16,9 @@ namespace NewKnowledgeAPI.Q.Questions.Model
         public string Id { get; set; }
         public string Title { get; set; }
         public string? CategoryTitle { get; set; }
-        public string? ParentCategory { get; set; }
+
        
+        public string? ParentCategory { get; set; }
        
         public QuestionRowDto()
             //: base()
@@ -56,6 +57,7 @@ namespace NewKnowledgeAPI.Q.Questions.Model
         public string Id { get; set; }
         public string Title { get; set; }
         public string? CategoryTitle { get; set; }
+        public string? OldParentCategory { get; set; }
         public string? ParentCategory { get; set; }
         public List<AssignedAnswerDto>? AssignedAnswerDtos { get; set; }
         public int NumOfAssignedAnswers { get; set; }
@@ -105,12 +107,14 @@ namespace NewKnowledgeAPI.Q.Questions.Model
             Status = question.Status;
         }
 
-        public void Deconstruct(out string partitionKey, out string id, out string? parentCategory,
+        public void Deconstruct(out string partitionKey, out string id,
+                                out string? oldParentCategory,  out string? parentCategory,
                               out string title, out int source, out int status, out WhoWhenDto? modified)
 
         {
             partitionKey = PartitionKey;
             id = Id;
+            oldParentCategory = OldParentCategory;
             parentCategory = ParentCategory;
             title = Title;
             source = Source;

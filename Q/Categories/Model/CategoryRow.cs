@@ -50,7 +50,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         }
 
         public CategoryRow(Category category)
-          : base(category.Created, category.Modified, null)
+          : base(category.Created, category.Modified)
         {
             var (partitionKey, id, parentCategory, title, link, header, level, kind,
                 hasSubCategories, subCategories,

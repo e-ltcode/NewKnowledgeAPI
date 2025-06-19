@@ -50,6 +50,29 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         {
         }
 
+        public Category(CategoryRow row)
+        {
+            var (partitionKey, id, parentCategory, title, link, header, level, kind,
+                           hasSubCategories, subCategories,
+                           hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId) = row;
+            PartitionKey = partitionKey;
+            Id = id;
+            ParentCategory = parentCategory;
+            Title = title;
+            Link = link;
+            Header = header;
+            Level = level;
+            Kind = kind;
+            HasSubCategories = hasSubCategories;
+            SubCategories = subCategories; //.Select(c => new CategoryRow(c)).ToList();
+            HasMoreQuestions = hasMoreQuestions;
+            NumOfQuestions = numOfQuestions;
+            QuestionRows = questionRows;
+            Variations = [];
+            IsExpanded = false;
+            RootId = rootId;
+        }
+
         public Category(Question question)
           : base()
         {
@@ -59,7 +82,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
 
 
         public Category(CategoryData categoryData)
-            : base(new WhoWhen("Admin"), null, null)
+            : base(new WhoWhen("Admin"), null)
         {
             var (partitionKey, id, title, link, header, parentCategory, kind, level, variations, categories, questions) = categoryData;
 
@@ -79,7 +102,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         }
 
         public Category(CategoryDto categoryDto)
-            :base(categoryDto.Created, categoryDto.Modified, null)
+            :base(categoryDto.Created, categoryDto.Modified)
         {
             Type = "category";
             Id = categoryDto.Id;

@@ -38,8 +38,8 @@ namespace NewKnowledgeAPI.A.Answers
         {
 
             var sqlQuery = Title != null
-                ? $"SELECT * FROM c WHERE c.Type = 'answer' AND c.Title = '{Title.Replace("\'", "\\'")}' AND IS_NULL(c.Archived)"
-                : $"SELECT * FROM c WHERE c.Type = 'answer' AND c.Id = '{Id}' AND IS_NULL(c.Archived)";
+                ? $"SELECT * FROM c WHERE c.Type = 'answer' AND c.Title = '{Title.Replace("\'", "\\'")}' "
+                : $"SELECT * FROM c WHERE c.Type = 'answer' AND c.Id = '{Id}' ";
             QueryDefinition queryDefinition = new(sqlQuery);
             FeedIterator<Answer> queryResultSetIterator =
                 _container!.GetItemQueryIterator<Answer>(queryDefinition);
@@ -251,7 +251,7 @@ namespace NewKnowledgeAPI.A.Answers
                 //    HttpStatusCode statusCode = await CheckDuplicate(answerDto.Title);
                 //}
                 // TODO check if is it already Archived
-                answer.Archived = new WhoWhen(answerDto.Modified!.NickName);
+                //answer.Archived = new WhoWhen(answerDto.Modified!.NickName);
 
                 aResponse = await myContainer.ReplaceItemAsync(answer, answer.Id, new PartitionKey(answer.PartitionKey));
                 Console.WriteLine("Updated Answer [{0},{1}].\n \tBody is now: {2}\n", answer.Title, answer.Id, answer);
@@ -280,7 +280,7 @@ namespace NewKnowledgeAPI.A.Answers
             var myContainer = await container();
             try { 
 
-                string sqlQuery = $"SELECT c.id, c.partitionKey, c.ParentGroup, c.Title, c.Link FROM c WHERE c.Type = 'answer' AND IS_NULL(c.Archived) AND " +
+                string sqlQuery = $"SELECT c.id, c.partitionKey, c.ParentGroup, c.Title, c.Link FROM c WHERE c.Type = 'answer'  AND " +
                     $" c.ParentGroup = '{parentGroup}' ORDER BY c.Title OFFSET {startCursor} ";
                 sqlQuery += includeAnswerId == "null"
                     ? $"LIMIT {pageSize}"
@@ -328,7 +328,7 @@ namespace NewKnowledgeAPI.A.Answers
             try
             {
                 // order of fields matters
-                var sqlQuery = $"SELECT c.partitionKey, c.id, c.ParentGroup, c.Title  FROM c WHERE c.Type = 'answer' AND IS_NULL(c.Archived) AND ";
+                var sqlQuery = $"SELECT c.partitionKey, c.id, c.ParentGroup, c.Title  FROM c WHERE c.Type = 'answer'  AND ";
                 if (words.Count == 1)
                 {
                     sqlQuery += $" CONTAINS(c.Title, \"{words[0]}\", true) ";
@@ -377,7 +377,7 @@ namespace NewKnowledgeAPI.A.Answers
 
                 // OR c.ParentGroup = ''
                 string sqlQuery = $"SELECT c.id, c.Title, c.Link FROM c " + 
-                    $" WHERE c.Type = 'answer' AND IS_NULL(c.Archived) AND " +
+                    $" WHERE c.Type = 'answer'  AND " +
                     $" ARRAY_CONTAINS(['{str}'], c.id, false)";
                 //Console.WriteLine("************ sqlQuery{0}", sqlQuery);
 

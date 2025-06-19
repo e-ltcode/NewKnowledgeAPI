@@ -40,8 +40,8 @@ namespace NewKnowledgeAPI.HistFilter
         {
 
             var sqlQuery = Title != null
-                ? $"SELECT * FROM c WHERE c.Type = 'history' AND c.Title = '{Title}' AND IS_NULL(c.Archived)"
-                : $"SELECT * FROM c WHERE c.Type = 'history' AND c.Id = '{Id}' AND IS_NULL(c.Archived)";
+                ? $"SELECT * FROM c WHERE c.Type = 'history' AND c.Title = '{Title}' "
+                : $"SELECT * FROM c WHERE c.Type = 'history' AND c.Id = '{Id}' ";
             QueryDefinition queryDefinition = new(sqlQuery);
             FeedIterator<History> queryResultSetIterator =
                 _container!.GetItemQueryIterator<History>(queryDefinition);
@@ -271,7 +271,7 @@ namespace NewKnowledgeAPI.HistFilter
             var myContainer = await container();
             try
             {
-                var sqlQuery = $"SELECT c.ParentCategory, c.Title, c.id FROM c WHERE c.Type = 'history' AND IS_NULL(c.Archived) AND ";
+                var sqlQuery = $"SELECT c.ParentCategory, c.Title, c.id FROM c WHERE c.Type = 'history'  AND ";
                 if (words.Count == 1)
                 {
                     sqlQuery += $" CONTAINS(c.Title, \"{words[0]}\", true) ";

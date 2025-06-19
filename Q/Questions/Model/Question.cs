@@ -19,13 +19,13 @@ namespace NewKnowledgeAPI.Q.Questions.Model
         public string Title { get; set; }
 
         public QuestionRow()
-            : base(new WhoWhen("Admin"), null, null)
+            : base(new WhoWhen("Admin"), null)
         {
             Title = string.Empty;
         }
 
         public QuestionRow(QuestionData data)
-           : base(new WhoWhen("Admin"), null, null)
+           : base(new WhoWhen("Admin"), null)
         {
             string s = DateTime.Now.Ticks.ToString();
             Id = data.Id ?? s.Substring(s.Length - 10);// Guid.NewGuid().ToString();
@@ -35,7 +35,7 @@ namespace NewKnowledgeAPI.Q.Questions.Model
         }
 
         public QuestionRow(QuestionDto dto)
-            : base(dto.Created, dto.Modified, null)
+            : base(dto.Created, dto.Modified)
         {
             //string s = DateTime.Now.Ticks.ToString();
             //Id = s.Substring(s.Length - 10);// Guid.NewGuid().ToString();
@@ -46,7 +46,7 @@ namespace NewKnowledgeAPI.Q.Questions.Model
         }
 
         public QuestionRow(QuestionRow row)
-            : base(row.Created, row.Modified, row.Archived)
+            : base(row.Created, row.Modified)
         {
             Id = row.Id;
             PartitionKey = row.PartitionKey!;

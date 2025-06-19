@@ -42,7 +42,7 @@ namespace NewKnowledgeAPI.A.Groups
         internal async Task<List<Group>> GetAllGroups()
         {
             var myContainer = await container();
-            var sqlQuery = "SELECT * FROM c WHERE c.Type = 'group' AND IS_NULL(c.Archived) ORDER BY c.Title ASC";
+            var sqlQuery = "SELECT * FROM c WHERE c.Type = 'group'  ORDER BY c.Title ASC";
             QueryDefinition queryDefinition = new(sqlQuery);
             FeedIterator<Group> queryResultSetIterator = myContainer.GetItemQueryIterator<Group>(queryDefinition);
             //List<GroupDto> subGroups = new List<GroupDto>();
@@ -63,7 +63,7 @@ namespace NewKnowledgeAPI.A.Groups
         internal async Task<List<Group>> GetSubGroups(string PartitionKey, string id)
         {
             var myContainer = await container();
-            var sqlQuery = $"SELECT * FROM c WHERE c.Type = 'group' AND IS_NULL(c.Archived) AND "
+            var sqlQuery = $"SELECT * FROM c WHERE c.Type = 'group'  AND "
             // for groups partitionKey is same as Id
             //+ (
             //    PartitionKey == "null"
@@ -350,7 +350,7 @@ namespace NewKnowledgeAPI.A.Groups
                 var sql = $"SELECT value count(1) FROM c WHERE c.Type = 'group' " +
                     "AND c.partitionKey='{PartitionKey} " +
                     "AND Parentgroup='{ParentGroup}' " + 
-                    "AND IS_NULL(c.Archived)";
+                    "";
                 int num = await CountItems(myContainer, sql);
                 Console.WriteLine($"============================ num: {num}");
 
@@ -429,7 +429,6 @@ namespace NewKnowledgeAPI.A.Groups
                         new PartitionKey(groupDto.PartitionKey)
                     );
                 Group group = aResponse.Resource;
-                group.Archived = new WhoWhen(groupDto.Modified!.NickName);
                 aResponse = await myContainer.ReplaceItemAsync(group, group.Id, new PartitionKey(group.PartitionKey));
                 msg = $"Updated Answer {group.PartitionKey}/{group.Id}. {group.Title}";
                 Console.WriteLine(msg);

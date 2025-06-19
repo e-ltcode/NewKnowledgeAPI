@@ -43,7 +43,7 @@ namespace NewKnowledgeAPI.Q.Categories
         internal async Task<List<CategoryRowDto>> GetAllCategoryRows()
         {
             var myContainer = await container();
-            var sqlQuery = "SELECT * FROM c WHERE c.Type = 'category' AND IS_NULL(c.Archived) ORDER BY c.Title ASC";
+            var sqlQuery = "SELECT * FROM c WHERE c.Type = 'category'  ORDER BY c.Title ASC";
             QueryDefinition queryDefinition = new(sqlQuery);
             FeedIterator<Category> queryResultSetIterator = myContainer.GetItemQueryIterator<Category>(queryDefinition);
             //List<CategoryDto> subCategories = new List<CategoryDto>();
@@ -63,7 +63,7 @@ namespace NewKnowledgeAPI.Q.Categories
         internal async Task<List<CategoryRow>> GetSubCategoryRows(Container? cntr, string PartitionKey, string id)
         {
             var myContainer = cntr != null ? cntr : await container();
-            var sqlQuery = $"SELECT * FROM c WHERE c.Type = 'category' AND IS_NULL(c.Archived) AND "
+            var sqlQuery = $"SELECT * FROM c WHERE c.Type = 'category'  AND "
             // for categories partitionKey is same as Id
             //+ (
             //    PartitionKey == "null"
@@ -206,8 +206,8 @@ namespace NewKnowledgeAPI.Q.Categories
         }
         */
 
-        public async Task<CategoryRowDtoEx> GetCategoryRow(CategoryKey categoryKey, 
-            bool hidrate, int pageSize, string? includeQuestionId)
+        public async Task<CategoryRow?> GetCategoryRow(CategoryKey categoryKey, bool hidrate, 
+            int pageSize, string? includeQuestionId)
         {
             // used for node expand
             var (PartitionKey, Id) = categoryKey;
@@ -246,8 +246,9 @@ namespace NewKnowledgeAPI.Q.Categories
                         }
                     }
                     var categoryRow = new CategoryRow(category);
-                    var categoryRowDto = new CategoryRowDto(categoryRow);
-                    return new CategoryRowDtoEx(categoryRowDto, "");
+                    return categoryRow; 
+                    //var categoryRowDto = new CategoryRowDto(categoryRow);
+                    //return new CategoryRowDtoEx(categoryRowDto, "");
                 }
             }
             catch (Exception ex)
@@ -256,7 +257,7 @@ namespace NewKnowledgeAPI.Q.Categories
                 Console.WriteLine(ex.Message);
                 msg = ex.Message;
             }
-            return new CategoryRowDtoEx(null, msg);
+            return null; // new CategoryRow(null, msg);
         }
 
 

@@ -42,7 +42,7 @@ namespace NewKnowledgeAPI.A.Groups.Model
 
 
         public Group(GroupData groupData)
-            : base(new WhoWhen("Admin"), null, null)
+            : base(new WhoWhen("Admin"), null)
         {
             Type = "group";
             Id = groupData.Id;
@@ -58,7 +58,7 @@ namespace NewKnowledgeAPI.A.Groups.Model
         }
 
         public Group(GroupDto groupDto)
-            :base(groupDto.Created, groupDto.Modified, null)
+            :base(groupDto.Created, groupDto.Modified)
         {
             Type = "group";
             Id = groupDto.Id;

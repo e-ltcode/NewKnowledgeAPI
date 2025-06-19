@@ -18,12 +18,12 @@ namespace NewKnowledgeAPI.A.Answers.Model
         public string? ParentGroup { get; set; }
 
         public AnswerRow()
-            : base(new WhoWhen("Admin"), null, null)
+            : base(new WhoWhen("Admin"), null)
         {
         }
 
         public AnswerRow(AnswerData answerData)
-                : base(new WhoWhen("Admin"), null, null)
+                : base(new WhoWhen("Admin"), null)
         {
             string s = DateTime.Now.Ticks.ToString();
             Id = answerData.Id ?? s.Substring(s.Length - 10);// Guid.NewGuid().ToString();
@@ -34,7 +34,7 @@ namespace NewKnowledgeAPI.A.Answers.Model
         }
 
         public AnswerRow(AnswerDto answerDto)
-        : base(answerDto.Created, answerDto.Modified, null)
+        : base(answerDto.Created, answerDto.Modified)
         {
             // string s = DateTime.Now.Ticks.ToString();
             // Id = s.Substring(s.Length - 10);// Guid.NewGuid().ToString();
@@ -45,7 +45,7 @@ namespace NewKnowledgeAPI.A.Answers.Model
         }
 
         public AnswerRow(AnswerRow row)
-            : base(row.Created, row.Modified, row.Archived)
+            : base(row.Created, row.Modified)
         {
             Id = row.Id;
             PartitionKey = row.PartitionKey!;

@@ -109,7 +109,6 @@ namespace NewKnowledgeAPI.Q.Questions
             }
         }
 
-
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Post([FromBody] QuestionDto questionDto)
@@ -153,26 +152,14 @@ namespace NewKnowledgeAPI.Q.Questions
                 Console.WriteLine("===>>> UpdateQuestion: {0} \n", questionDto.Title);
                 var questionService = new QuestionService(dbService);
                 var categoryService = new CategoryService(dbService);
-
-                QuestionEx questionEx = await questionService.UpdateQuestion(questionDto, categoryService);
-                var (question, msg) = questionEx;
-                Console.WriteLine(JsonConvert.SerializeObject(questionEx));
-                if (question != null)
+                QuestionDtoEx questionDtoEx = await questionService.UpdateQuestion(questionDto, categoryService);
+                var (updatedQuestionDto, msg) = questionDtoEx;
+                //Console.WriteLine(JsonConvert.SerializeObject(questionEx));
+                if (questionDtoEx.questionDto != null)
                 {
-                    if (question.ParentCategory != questionDto.ParentCategory) {
-                        // category changed 
-                        await categoryService.UpdateNumOfQuestions(
-                            new CategoryKey(questionDto.PartitionKey, questionDto.ParentCategory!),
-                            new WhoWhen(questionDto.Modified!), 
-                            -1);
-                        await categoryService.UpdateNumOfQuestions(
-                            new CategoryKey(question.PartitionKey, question.ParentCategory!),
-                            question.Modified!, 
-                            1);
-                    }
-                    return Ok(new QuestionDtoEx(questionEx));
+                    return Ok(questionDtoEx);
                 }
-                return NotFound(new QuestionDtoEx(questionEx));
+                return NotFound(questionDtoEx);
             }
             catch (Exception ex)
             {
@@ -189,17 +176,16 @@ namespace NewKnowledgeAPI.Q.Questions
                 Console.WriteLine("===>>> DeleteQuestion: {0}/{1} \n", questionDto.PartitionKey, questionDto.Id);
                 var categoryService = new CategoryService(dbService);
                 var questionService = new QuestionService(dbService);
-                QuestionEx questionEx = await questionService.DeleteQuestion(questionDto);
-                if (questionEx!.question != null)
+                String msg = await questionService.ArchiveQuestion(null, questionDto.PartitionKey, questionDto.Id);
+                if (msg.Equals(String.Empty))
                 {
-                    questionDto.Modified = questionDto.Modified; //.Archived;
                     await categoryService.UpdateNumOfQuestions(
                            new CategoryKey(questionDto.PartitionKey, questionDto.ParentCategory!),
                            new WhoWhen(questionDto.Modified!),
                            -1);
-                    return Ok(new QuestionDtoEx(questionEx));
+                    return Ok(new QuestionDtoEx(questionDto));
                 }
-                return NotFound(questionEx);
+                return NotFound(new QuestionDtoEx(msg));
             }
             catch (Exception ex)
             {

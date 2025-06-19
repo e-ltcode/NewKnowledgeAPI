@@ -285,7 +285,7 @@ namespace NewKnowledgeAPI.Hist
             var myContainer = await container();
             try
             {
-                var sqlQuery = $"SELECT c.ParentCategory, c.Title, c.id FROM c WHERE c.Type = 'history' AND IS_NULL(c.Archived) AND ";
+                var sqlQuery = $"SELECT c.ParentCategory, c.Title, c.id FROM c WHERE c.Type = 'history'  AND ";
                 if (words.Count == 1)
                 {
                     sqlQuery += $" CONTAINS(c.Title, \"{words[0]}\", true) ";

@@ -47,8 +47,8 @@ namespace NewKnowledgeAPI.Q.Categories
                 //Category cat = await category.GetCategory(
                 //    partitionKey, id, true, pageSize, includeQuestionId=="null" ? null : includeQuestionId);
                 var categoryService = new CategoryService(dbService);
-                CategoryEx categoryEx = await categoryService.GetCategoryHidrated(
-                       categoryKey, 
+
+                CategoryEx categoryEx = await categoryService.GetCategory(categoryKey, true /* hidrate*/,  
                        pageSize, 
                        includeQuestionId //== "null" ? null : includeQuestionId
                 );
@@ -64,6 +64,7 @@ namespace NewKnowledgeAPI.Q.Categories
             }
         }
 
+        /*
         [HttpGet("{partitionKey}/{id}/{hidrate}")]
         //[ResponseCache(Duration = 120, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "partitionKey", "id" })]
         public async Task<IActionResult> GetCategoryHidrated(string partitionKey, string id, bool hidrate)
@@ -91,6 +92,7 @@ namespace NewKnowledgeAPI.Q.Categories
                 return BadRequest(ex.Message);
             }
         }
+        */
 
         /*
         [HttpGet("{partitionKey}/{id}")]
@@ -188,7 +190,7 @@ namespace NewKnowledgeAPI.Q.Categories
             {
                 Console.WriteLine("===>>> DeleteCategory: {0}/{1} \n", categoryDto.PartitionKey, categoryDto.Id);
                 var categoryService = new CategoryService(dbService);
-                CategoryEx categoryEx = await categoryService.DeleteCategory(categoryDto);
+                CategoryEx categoryEx = await categoryService.ArchiveCategory(null, new Category(categoryDto));
                 if (categoryEx.category != null)
                 {
                     return Ok(new CategoryDtoEx(categoryEx));

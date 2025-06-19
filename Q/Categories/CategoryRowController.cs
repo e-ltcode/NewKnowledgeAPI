@@ -11,7 +11,6 @@ using NewKnowledgeAPI.Q.Categories.Model;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 
-
 namespace NewKnowledgeAPI.Q.Categories
 {
     [Route("api/[controller]")]
@@ -120,7 +119,9 @@ namespace NewKnowledgeAPI.Q.Categories
                 //using (var db = new Db(this.Configuration)) {}
 
                 var categoryRowService = new CategoryRowService(dbService);
-                CategoryRowDtoEx categoryRowDtoEx = await categoryRowService.GetCategoryRow(categoryKey, hidrate, pageSize, includeQuestionId);
+                CategoryRow categoryRow = await categoryRowService.GetCategoryRow(categoryKey, hidrate, pageSize, includeQuestionId);
+                var categoryRowDto = new CategoryRowDto(categoryRow);
+                var categoryRowDtoEx = new CategoryRowDtoEx(categoryRowDto, "");
                 if (categoryRowDtoEx.categoryRowDto != null)
                 {
                     return Ok(categoryRowDtoEx);

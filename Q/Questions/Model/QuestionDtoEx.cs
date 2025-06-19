@@ -22,6 +22,12 @@ namespace NewKnowledgeAPI.Q.Questions.Model
             this.msg = msg;
         }
 
+        public QuestionDtoEx(QuestionDto questionDto)
+        {
+            this.questionDto = questionDto;
+            this.msg = String.Empty;
+        }
+
         public QuestionDtoEx(string msg)
         {
             questionDto = null;
