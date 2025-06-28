@@ -142,7 +142,7 @@ namespace NewKnowledgeAPI.Q.Questions
             var myContainer = await container();
             try
             {
-                Question q = new(questionDto);
+                var q = new Question(questionDto);
                 QuestionEx questionEx = await AddNewQuestion(myContainer, q);
                 return questionEx;
             }
@@ -437,7 +437,14 @@ namespace NewKnowledgeAPI.Q.Questions
                         if (includeQuestionId != null && questionRow.Id == includeQuestionId)
                         {
                             included = true;
+                            questionRow.Included = true;
                         }
+                        else
+                        {
+                            questionRow.Included = false;
+                        }
+
+
                         //Console.WriteLine(">>>>>>>> question is: {0}", JsonConvert.SerializeObject(question));
                         list.Add(questionRow);
                         n++;

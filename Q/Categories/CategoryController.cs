@@ -184,13 +184,14 @@ namespace NewKnowledgeAPI.Q.Categories
         //[HttpDelete("{partitionKey}, {id}")]
         [HttpDelete]
         [Authorize]
-        public async Task<IActionResult> Delete([FromBody] CategoryDto categoryDto) //string PartitionKey, string id)
+        public async Task<IActionResult> Delete([FromBody] CategoryRowDto rowDto) //string PartitionKey, string id)
         {
             try
             {
-                Console.WriteLine("===>>> DeleteCategory: {0}/{1} \n", categoryDto.PartitionKey, categoryDto.Id);
+                var categoryKey = new CategoryKey(rowDto);
+                Console.WriteLine("===>>> DeleteCategory: {0}/{1} \n", rowDto.PartitionKey, rowDto.Id);
                 var categoryService = new CategoryService(dbService);
-                CategoryEx categoryEx = await categoryService.ArchiveCategory(null, new Category(categoryDto));
+                CategoryEx categoryEx = await categoryService.ArchiveCategory(null, categoryKey, rowDto.Modified!.NickName);
                 if (categoryEx.category != null)
                 {
                     return Ok(new CategoryDtoEx(categoryEx));

@@ -19,24 +19,23 @@ namespace NewKnowledgeAPI.Q.Questions.Model
 
        
         public string? ParentCategory { get; set; }
+        public bool? Included {  get; set; }
        
         public QuestionRowDto()
-            //: base()
         {
         }
 
         public QuestionRowDto(QuestionRow questionRow)
-           //: base(questionRow.Created, questionRow.Modified, questionRow.Archived)
         {
             //Console.WriteLine(JsonConvert.SerializeObject(question));
             PartitionKey = questionRow.PartitionKey;
             Id = questionRow.Id;
             Title = questionRow.Title;
             ParentCategory = questionRow.ParentCategory;
+            Included = questionRow.Included;
         }
 
         public QuestionRowDto(Question question)
-            //: base(question.Created, question.Modified, question.Archived)
         {
             //Console.WriteLine(JsonConvert.SerializeObject(question));
             var questionKey = new QuestionKey(question);

@@ -18,7 +18,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         public int Kind { get; set; }
         public int Level { get; set; }
         public bool HasSubCategories { get; set; }
-        public List<CategoryRowDto>? SubCategories { get; set; }
+        public List<CategoryRowDto>? SubCategoryRowDtos { get; set; }
         public int NumOfQuestions { get; set; }
         public List<QuestionRowDto>? QuestionRowDtos { get; set; }
 
@@ -27,6 +27,11 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         public List<string>? Variations { get; set; }
 
         public bool? IsExpanded { get; set; }
+        public WhoWhenDto? Modified { get; set; }
+
+        public CategoryRowDto()
+        {
+        }
 
         public CategoryRowDto(CategoryRow categoryRow)
         {
@@ -40,7 +45,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             ParentCategory = parentCategory;
             Level = level;
             HasSubCategories = hasSubCategories;
-            SubCategories = subCategories.Select(c => new CategoryRowDto(c)).ToList();
+            SubCategoryRowDtos = subCategories.Select(c => new CategoryRowDto(c)).ToList();
             NumOfQuestions = numOfQuestions;
             QuestionRowDtos = questionRows != null ? questionRows.Select(q => new QuestionRowDto(q)).ToList(): [];
             Variations = variations ?? [];

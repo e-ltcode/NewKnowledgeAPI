@@ -44,6 +44,8 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         [JsonProperty(PropertyName = "IsExpanded", NullValueHandling = NullValueHandling.Ignore)]
         public bool? IsExpanded { get; set; }
 
+        public string Doc1 { get; set; } // just to differentiate ICategoryRow and ICategory ad FrontEnd
+
 
         public Category()
             : base()
@@ -145,7 +147,8 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             out List<QuestionRow>? questionRows,
             out List<string>? variations,
             out bool? isExpanded,
-            out string? rootId)
+            out string? rootId,
+            out string doc1)
         {
             partitionKey = PartitionKey;
             id = Id;
@@ -163,6 +166,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             variations = Variations;
             isExpanded = IsExpanded;
             rootId = RootId;
+            doc1 = Doc1;
         }
 
         public static int Comparer(Category x, Category y)

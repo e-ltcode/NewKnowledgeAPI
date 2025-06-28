@@ -24,6 +24,12 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         }
 
 
+        public CategoryKey(CategoryRowDto rowDto)
+        {
+            PartitionKey = rowDto.PartitionKey;
+            Id = rowDto.Id;
+        }
+
         public CategoryKey(CategoryDto categoryDto)
         {
             PartitionKey = categoryDto.PartitionKey;

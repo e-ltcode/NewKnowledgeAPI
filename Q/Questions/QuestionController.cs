@@ -132,7 +132,7 @@ namespace NewKnowledgeAPI.Q.Questions
                     await categoryService.UpdateNumOfQuestions(
                            new CategoryKey(questionDto.PartitionKey, questionDto.ParentCategory!),
                            new WhoWhen(questionDto.Modified!),
-                           -1);
+                           +1);
                 }
                 // Console.WriteLine("^^^^^^^^^^^ questionEx" + JsonConvert.SerializeObject(questionEx));
                 return Ok(new QuestionDtoEx(questionEx));

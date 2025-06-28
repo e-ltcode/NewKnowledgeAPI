@@ -31,7 +31,9 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         public bool? HasMoreQuestions { get; set; }
 
         public bool? IsExpanded { get; set; }
-       
+        public string Doc1 { get; set; } // just to differentiate ICategoryRow and ICategory ad FrontEnd
+
+
 
         public CategoryDto()
             : base()
@@ -59,6 +61,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             //}
             QuestionRowDtos = Questions2Dto(questionsMore.QuestionRows/*.Select(row => new Question(row))*/.ToList());
             HasMoreQuestions = questionsMore.HasMoreQuestions;
+            Doc1 = string.Empty;
         }
 
         public CategoryDto(Category category)
@@ -66,7 +69,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         {
             var (partitionKey, id, parentCategory, title, link, header, level, kind,
                 hasSubCategories, subCategories,
-                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId) = category;
+                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId, doc1) = category;
 
             Id = id;
             PartitionKey = partitionKey!;
@@ -84,6 +87,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
                 : [];
             NumOfQuestions = numOfQuestions; //questions == null ? 0 : questions.Count;
             IsExpanded = isExpanded;
+            Doc1 = doc1;
             if (questionRows == null)
             {
                 QuestionRowDtos = [];
@@ -130,7 +134,8 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         public void Deconstruct(out string partitionKey, out string id, out string parentCategory, 
                 out string title, out string? link, 
                 out int level, out int kind, out List<string>? variations,
-                out WhoWhenDto? modified)
+                out WhoWhenDto? modified,
+                out string doc1 )
         {
             partitionKey = PartitionKey;
             id = Id;
@@ -141,6 +146,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
             level = Level;
             variations = Variations;
             modified = Modified;
+            doc1 = Doc1;
         }
 
     }

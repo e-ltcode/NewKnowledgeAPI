@@ -188,6 +188,7 @@ namespace NewKnowledgeAPI.Q.Categories
             try
             {
                 var c = new Category(categoryData);
+                c.Doc1 = string.Empty;
                 CategoryEx categoryEx = await AddNewCategory(myContainer, c);
                 if (categoryEx.category != null)
                 {
@@ -226,7 +227,7 @@ namespace NewKnowledgeAPI.Q.Categories
         {
             var (partitionKey, id, parentCategory, title, link, header, level, kind,
                 hasSubCategories, subCategories,
-                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId) = category;
+                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId, doc1) = category;
             var myContainer = cntr != null ? cntr : await container();
             string msg = string.Empty;
             try
@@ -278,6 +279,7 @@ namespace NewKnowledgeAPI.Q.Categories
             categoryDto.PartitionKey = categoryDto.Id;
             var myContainer = await container();
             var category = new Category(categoryDto);
+            category.Doc1 = string.Empty;
             CategoryEx categoryEx = await AddNewCategory(myContainer, category);
 
             // update parentCategory
@@ -343,7 +345,7 @@ namespace NewKnowledgeAPI.Q.Categories
             string msg = string.Empty;
             try
             {
-                var (partitionKey, id, parentCategory, title, link, level, kind, variations, modified) = categoryDto;
+                var (partitionKey, id, parentCategory, title, link, level, kind, variations, modified, doc1) = categoryDto;
                 // Read the item to see if it exists.  
                 ItemResponse<Category> aResponse =
                     await myContainer!.ReadItemAsync<Category>(
@@ -515,14 +517,15 @@ namespace NewKnowledgeAPI.Q.Categories
             return new CategoryEx(null, msg);
         }
 
-        public async Task<CategoryEx> ArchiveCategory(Container? cntr, Category c)
+        public async Task<CategoryEx> ArchiveCategory(Container? cntr, CategoryKey categoryKey, string nickName)
         {
             var myContainer = cntr != null ? cntr : await container();
+            var (partitionKey, id) = categoryKey;
             string msg = string.Empty;
             try
             {
                 ItemResponse<Category> aResponse =
-                    await myContainer.ReadItemAsync<Category>(c.Id, new PartitionKey(c.PartitionKey));
+                    await myContainer.ReadItemAsync<Category>(id, new PartitionKey(partitionKey));
                 Category category = aResponse.Resource;
                 if (category.HasSubCategories)
                 {
@@ -537,8 +540,8 @@ namespace NewKnowledgeAPI.Q.Categories
                 //msg = $"Archived Category {category.PartitionKey}/{category.Id}. {category.Title}";
                 //Console.WriteLine(msg);
                 await myContainer.DeleteItemAsync<Category>(
-                        c.Id,
-                        new PartitionKey(c.PartitionKey)
+                        id,
+                        new PartitionKey(partitionKey)
                     );
 
                 category.PartitionKey = "Archived";
@@ -546,12 +549,12 @@ namespace NewKnowledgeAPI.Q.Categories
                 CategoryEx categoryEx = await AddNewCategory(myContainer, category);
 
                 // update parentCategory
-                await UpdateHasSubCategories(myContainer, c.ParentCategory, c.Modified!.NickName);
+                await UpdateHasSubCategories(myContainer, category.ParentCategory!, nickName);
                 return new CategoryEx(aResponse.Resource, "OK");
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
-                msg =$"Category {c.Id} NotFound in database."; //, aResponse.RequestCharge);
+                msg =$"Category {id} NotFound in database."; //, aResponse.RequestCharge);
                 Console.WriteLine(msg);
             }
             catch (Exception ex)

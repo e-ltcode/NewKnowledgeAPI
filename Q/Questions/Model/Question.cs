@@ -18,6 +18,9 @@ namespace NewKnowledgeAPI.Q.Questions.Model
 
         public string Title { get; set; }
 
+        [JsonProperty(PropertyName = "Included", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Included {  get; set; }
+
         public QuestionRow()
             : base(new WhoWhen("Admin"), null)
         {
@@ -39,6 +42,11 @@ namespace NewKnowledgeAPI.Q.Questions.Model
         {
             //string s = DateTime.Now.Ticks.ToString();
             //Id = s.Substring(s.Length - 10);// Guid.NewGuid().ToString();
+            if (dto.Id.Equals("generateId")) {
+                string s = DateTime.Now.Ticks.ToString();
+                dto.Id = s.Substring(s.Length - 10);// Guid.NewGuid().ToString();
+            }
+
             Id = dto.Id;
             PartitionKey = dto.PartitionKey!;
             Title = dto.Title;

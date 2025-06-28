@@ -54,7 +54,7 @@ namespace NewKnowledgeAPI.Q.Categories.Model
         {
             var (partitionKey, id, parentCategory, title, link, header, level, kind,
                 hasSubCategories, subCategories,
-                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId) = category;
+                hasMoreQuestions, numOfQuestions, questionRows, variations, isExpanded, rootId, doc1) = category;
 
             PartitionKey = partitionKey;
             Id = id;

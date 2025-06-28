@@ -74,7 +74,9 @@ namespace NewKnowledgeAPI.Q.Categories
                 id == "null"
                     ? $" IS_NULL(c.ParentCategory)"
                     : $" c.ParentCategory = '{id}'"
-            );
+            )
+            + " ORDER BY c.Title";
+            
             QueryDefinition queryDefinition = new(sqlQuery);
             FeedIterator<Category> queryResultSetIterator = myContainer!.GetItemQueryIterator<Category>(queryDefinition);
             List<CategoryRow> subCategorRows = [];
@@ -206,8 +208,8 @@ namespace NewKnowledgeAPI.Q.Categories
         }
         */
 
-        public async Task<CategoryRow?> GetCategoryRow(CategoryKey categoryKey, bool hidrate, 
-            int pageSize, string? includeQuestionId)
+        public async Task<CategoryRow?> GetCategoryRow(CategoryKey categoryKey, 
+            bool hidrate, int pageSize, string? includeQuestionId)
         {
             // used for node expand
             var (PartitionKey, Id) = categoryKey;
