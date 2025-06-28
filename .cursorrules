@@ -1,0 +1,111 @@
+# NewKnowledgeAPI Cursor Rules
+
+## Project Overview
+This is a Knowledge Management API built with ASP.NET Core (.NET 8) that provides a sophisticated Q&A system with AI-powered semantic search capabilities using OpenAI embeddings and Azure Cosmos DB.
+
+## Code Style and Conventions
+
+### C# Conventions
+- Use PascalCase for public members, types, and methods
+- Use camelCase for private fields and local variables
+- Prefix interfaces with 'I' (e.g., IQuestionService)
+- Use 'Async' suffix for async methods
+- Use explicit types instead of 'var' when type isn't obvious
+- Follow Microsoft C# coding conventions
+
+### Architecture Patterns
+- Follow Repository pattern for data access (DbService)
+- Use Service layer for business logic
+- Keep controllers thin - delegate to services
+- Use DTOs for API responses, separate from domain models
+- Follow RESTful API design principles
+
+### Naming Conventions
+- Controllers: {Entity}Controller (e.g., QuestionController)
+- Services: {Entity}Service (e.g., QuestionService)
+- DTOs: {Entity}Dto (e.g., QuestionDto)
+- Extended DTOs: {Entity}DtoEx (e.g., QuestionDtoEx)
+- Domain Models: Plain names (e.g., Question, Answer)
+
+### Project Structure
+```
+/
+├── A/                    # Answers domain
+│   ├── Answers/         # Answer entities and services
+│   └── Groups/          # Group entities and services
+├── Q/                    # Questions domain
+│   ├── Questions/       # Question entities and services
+│   └── Categories/      # Category entities and services
+├── History/             # User interaction tracking
+├── Services/            # Shared services (DB, OpenAI, Vector Search)
+├── Common/              # Shared models and utilities
+└── Models/              # Additional models (e.g., EmbeddedQuestion)
+```
+
+### Database (Cosmos DB) Conventions
+- Use partition keys consistently (e.g., "kind" property)
+- Include "id" and "_etag" for all documents
+- Use hierarchical data modeling for parent-child relationships
+- Store embeddings as float arrays in dedicated properties
+
+### API Design
+- Use attribute routing: [Route("api/[controller]")]
+- Support pagination where appropriate
+- Return appropriate HTTP status codes
+- Use [Authorize] attribute for protected endpoints
+- Include proper error handling and logging
+
+### Vector Search & AI Integration
+- Generate embeddings for all searchable content
+- Cache embeddings to reduce API calls
+- Use cosine similarity for vector search
+- Store embeddings alongside original content
+- Handle OpenAI API errors gracefully
+
+### Testing Approach
+- Write unit tests for services
+- Use xUnit for testing framework
+- Mock external dependencies (Cosmos DB, OpenAI)
+- Test vector search accuracy with sample queries
+- Validate embedding generation and storage
+
+### Security Best Practices
+- Never commit API keys or connection strings
+- Use Azure Key Vault or environment variables for secrets
+- Validate all input data
+- Use parameterized queries
+- Implement proper authentication and authorization
+
+### Performance Considerations
+- Use caching for frequently accessed data
+- Implement efficient Cosmos DB queries with proper indexing
+- Batch embedding generation when possible
+- Use async/await throughout the application
+- Monitor and optimize vector search performance
+
+### Common Tasks
+- To add a new entity: Create model, DTO, service, and controller
+- To add vector search: Generate embeddings, store in Cosmos DB, implement similarity search
+- To track history: Use HistoryService to record user interactions
+- To add caching: Use IMemoryCache with appropriate expiration
+
+### Dependencies
+- .NET 8.0
+- Azure Cosmos DB
+- Azure AD Authentication
+- OpenAI API (for embeddings)
+- Newtonsoft.Json
+- Microsoft.Extensions.Caching.Memory
+
+### Environment Variables Required
+- COSMOS_CONNECTION_STRING
+- OPENAI_API_KEY
+- AZURE_AD_TENANT_ID
+- AZURE_AD_CLIENT_ID
+
+### Debugging Tips
+- Check Cosmos DB Explorer for data structure
+- Use Postman/Thunder Client for API testing
+- Monitor OpenAI API usage and costs
+- Check application logs for vector search performance
+- Validate JWT tokens for authentication issues

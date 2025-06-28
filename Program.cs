@@ -4,6 +4,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Logging;
+using NewKnowledgeAPI.Services;
+using Knowledge.Services;
+using NewKnowledgeAPI.Q.Questions;
+using NewKnowledgeAPI.Q.Categories;
+using NewKnowledgeAPI.A.Answers;
+using NewKnowledgeAPI.A.Groups;
+using NewKnowledgeAPI.History;
+using NewKnowledgeAPI.HistoryFilter;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins"; // TODO ubaci u controller
 
@@ -108,8 +116,24 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddResponseCaching();
 
+// Register database service
+builder.Services.AddSingleton<DbService>();
+
+// Register AI and search services
 builder.Services.AddSingleton<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddSingleton<IVectorSearchService, VectorSearchService>();
+builder.Services.AddScoped<ISearchEnhancementService, SearchEnhancementService>();
+
+// Register background service for automatic embedding generation
+builder.Services.AddEmbeddingBackgroundService();
+
+// Register domain services
+builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<AnswerService>();
+builder.Services.AddScoped<GroupService>();
+builder.Services.AddScoped<HistoryService>();
+builder.Services.AddScoped<HistoryFilterService>();
 
 var app = builder.Build();
 
