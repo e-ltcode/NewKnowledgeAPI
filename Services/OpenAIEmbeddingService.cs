@@ -1,5 +1,5 @@
-using Azure.AI.OpenAI;
 using Microsoft.Extensions.Caching.Memory;
+using OpenAI;
 
 namespace NewKnowledgeAPI.Services
 {
@@ -29,7 +29,7 @@ namespace NewKnowledgeAPI.Services
                 ?? throw new ArgumentNullException("OpenAI:ApiKey configuration is missing");
             // Allow model to be set in config, fallback to ada-002
             _embeddingModel = configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-ada-002";
-            _openAIClient = new OpenAIClient(apiKey, new OpenAIClientOptions());
+            _openAIClient = new OpenAIClient(apiKey);
             _cache = cache;
             _logger = logger;
         }
@@ -49,20 +49,35 @@ namespace NewKnowledgeAPI.Services
                 return cachedEmbedding;
             }
 
-            try
+            const int maxRetries = 3;
+            var baseDelay = TimeSpan.FromSeconds(1);
+            
+            for (int attempt = 0; attempt < maxRetries; attempt++)
             {
-                var embeddingOptions = new EmbeddingsOptions(_embeddingModel, new List<string> { text });
-                var response = await _openAIClient.GetEmbeddingsAsync(embeddingOptions);
-                var embedding = response.Value.Data[0].Embedding.ToArray();
+                try
+                {
+                    var response = await _openAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync(text, _embeddingModel);
+                    var embedding = response.Data[0].Embedding.ToArray();
 
-                _cache.Set(cacheKey, embedding, TimeSpan.FromMinutes(CacheExpirationMinutes));
-                return embedding;
+                    _cache.Set(cacheKey, embedding, TimeSpan.FromMinutes(CacheExpirationMinutes));
+                    return embedding;
+                }
+                catch (Exception ex) when (attempt < maxRetries - 1)
+                {
+                    var delay = TimeSpan.FromTicks(baseDelay.Ticks * (long)Math.Pow(2, attempt));
+                    _logger.LogWarning(ex, "Embedding generation failed on attempt {Attempt}, retrying in {Delay}ms", 
+                        attempt + 1, delay.TotalMilliseconds);
+                    await Task.Delay(delay);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error generating embedding for text after {MaxRetries} attempts: {Text}", 
+                        maxRetries, text);
+                    throw new ApplicationException("Failed to generate embedding. Please try again later.");
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error generating embedding for text: {Text}", text);
-                throw new ApplicationException("Failed to generate embedding. Please try again later.");
-            }
+
+            throw new ApplicationException("Failed to generate embedding after all retry attempts.");
         }
     }
 } 

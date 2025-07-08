@@ -3,14 +3,16 @@ using Knowledge.Services;
 using Microsoft.Azure.Cosmos;
 using NewKnowledgeAPI.Common;
 using Newtonsoft.Json;
-using NewKnowledgeAPI.Hist.Model;
+using NewKnowledgeAPI.History.Model;
 using NewKnowledgeAPI.Q.Questions.Model;
+using NewKnowledgeAPI.A.Answers.Model;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using NewKnowledgeAPI.Q.Questions;
+using NewKnowledgeAPI.A.Answers;
 using Microsoft.AspNetCore.Http.HttpResults;
-using NewKnowledgeAPI.HistFilter.Model;
+using NewKnowledgeAPI.HistoryFilter.Model;
 
-namespace NewKnowledgeAPI.HistFilter
+namespace NewKnowledgeAPI.HistoryFilter
 {
     public class HistoryFilterService : IDisposable
     {
@@ -43,11 +45,16 @@ namespace NewKnowledgeAPI.HistFilter
                 ? $"SELECT * FROM c WHERE c.Type = 'history' AND c.Title = '{Title}' AND IS_NULL(c.Archived)"
                 : $"SELECT * FROM c WHERE c.Type = 'history' AND c.Id = '{Id}' AND IS_NULL(c.Archived)";
             QueryDefinition queryDefinition = new(sqlQuery);
-            FeedIterator<History> queryResultSetIterator =
-                _container!.GetItemQueryIterator<History>(queryDefinition);
+
+            // Ensure the container is initialized
+            var myContainer = await container();
+
+            FeedIterator<NewKnowledgeAPI.History.Model.History> queryResultSetIterator =
+                myContainer.GetItemQueryIterator<NewKnowledgeAPI.History.Model.History>(queryDefinition);
+
             if (queryResultSetIterator.HasMoreResults)
             {
-                FeedResponse<History> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                FeedResponse<NewKnowledgeAPI.History.Model.History> currentResultSet = await queryResultSetIterator.ReadNextAsync();
                 if (currentResultSet.Count == 0)
                 {
                     throw new CosmosException("History Title already exists", HttpStatusCode.NotFound, 0, "0", 0);
@@ -56,7 +63,7 @@ namespace NewKnowledgeAPI.HistFilter
             return HttpStatusCode.Found;
         }
           
-        public async Task<HistoryFilterEx> AddNewHistory(HistoryFilter history)
+        public async Task<HistoryFilterEx> AddNewHistory(Model.HistoryFilter history)
         {
             var (partitionKey, id, questionKey, filter, created) = history;
             var myContainer = await container();
@@ -93,7 +100,7 @@ namespace NewKnowledgeAPI.HistFilter
         }
 
 
-        public async Task<QuestionEx> CreateHistoryFilter(HistoryFilter historyFilter, QuestionService questionService)
+        public async Task<QuestionEx> CreateHistoryFilter(Model.HistoryFilter historyFilter, QuestionService questionService)
         {
             var(_, _, questionKey, filter, created) = historyFilter;
             var myContainer = await container();
@@ -199,13 +206,13 @@ namespace NewKnowledgeAPI.HistFilter
         public async Task<HistoryEx> GetHistory(string PartitionKey, string Id)
         {
             var myContainer = await container();
-            History? history = null;
+            Model.History? history = null;
             string msg = string.Empty;
             try
             {
                 Console.WriteLine($"*****************************  {PartitionKey}/{Id}");
                 // Read the item to see if it exists.  
-                history = await myContainer.ReadItemAsync<History>(
+                history = await myContainer.ReadItemAsync<Model.History>(
                     Id,
                     new PartitionKey(PartitionKey)
                 );
@@ -229,7 +236,7 @@ namespace NewKnowledgeAPI.HistFilter
 
         public async Task<HistoryListEx> GetHistories(string QuestionId)
         {
-            List<History> histories = [];
+            List<Model.History> histories = [];
             string msg = string.Empty;
             var myContainer = await container();
             try
@@ -244,11 +251,11 @@ namespace NewKnowledgeAPI.HistFilter
                 Console.WriteLine("************ sqlQuery{0}", sqlQuery);
 
                 QueryDefinition queryDefinition = new QueryDefinition(sqlQuery);
-                FeedIterator<History> queryResultSetIterator = myContainer!.GetItemQueryIterator<History>(queryDefinition);
+                FeedIterator<Model.History> queryResultSetIterator = myContainer!.GetItemQueryIterator<Model.History>(queryDefinition);
                 while (queryResultSetIterator.HasMoreResults)
                 {
-                    FeedResponse<History> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                    foreach (History history in currentResultSet)
+                    FeedResponse<Model.History> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                    foreach (Model.History history in currentResultSet)
                     {
                         Console.WriteLine(">>>>>>>> history is: {0}", JsonConvert.SerializeObject(history));
                         histories.Add(history);

@@ -6,7 +6,7 @@ using NewKnowledgeAPI.Q.Questions.Model;
 using Newtonsoft.Json;
 using System.Net;
 
-namespace NewKnowledgeAPI.HistFilter.Model
+namespace NewKnowledgeAPI.HistoryFilter.Model
 {
     public class HistoryFilterDto //: RecordDto
     {

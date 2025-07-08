@@ -6,7 +6,7 @@ using NewKnowledgeAPI.Q.Questions.Model;
 using Newtonsoft.Json;
 using System.Net;
 
-namespace NewKnowledgeAPI.Hist.Model
+namespace NewKnowledgeAPI.History.Model
 {
     public class AnswerRatedDto 
     {

@@ -3,13 +3,13 @@ using Knowledge.Services;
 using Microsoft.Azure.Cosmos;
 using NewKnowledgeAPI.Common;
 using Newtonsoft.Json;
-using NewKnowledgeAPI.Hist.Model;
+using NewKnowledgeAPI.History.Model;
 using NewKnowledgeAPI.Q.Questions.Model;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using NewKnowledgeAPI.Q.Questions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace NewKnowledgeAPI.Hist
+namespace NewKnowledgeAPI.History
 {
     public class HistoryService : IDisposable
     {
@@ -66,7 +66,7 @@ namespace NewKnowledgeAPI.Hist
         }
 
 
-        public async Task<HistoryEx> AddNewHistory(History history)
+        public async Task<HistoryEx> AddNewHistory(Model.History history)
         {
             var (PartitionKey, Id, QuestionId, AnswerId, Fixed, NickName ) = history;
             var myContainer = await container();
@@ -103,7 +103,7 @@ namespace NewKnowledgeAPI.Hist
         }
 
 
-        public async Task<QuestionEx> CreateHistory(History h, QuestionService questionService)
+        public async Task<QuestionEx> CreateHistory(Model.History h, QuestionService questionService)
         {
             var myContainer = await container();
             try

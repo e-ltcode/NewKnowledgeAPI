@@ -3,7 +3,7 @@ using NewKnowledgeAPI.Q.Questions.Model;
 using System.Diagnostics.Metrics;
 
 
-namespace NewKnowledgeAPI.Hist.Model
+namespace NewKnowledgeAPI.History.Model
 {
     public class HistoryData
     {

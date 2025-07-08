@@ -2,7 +2,7 @@
 using System.Diagnostics.Metrics;
 
 
-namespace NewKnowledgeAPI.HistFilter.Model
+namespace NewKnowledgeAPI.HistoryFilter.Model
 {
     public class HistoryFilterKey
     {

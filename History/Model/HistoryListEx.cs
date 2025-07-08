@@ -1,7 +1,7 @@
 ﻿using NewKnowledgeAPI.Common;
 using Newtonsoft.Json;
 
-namespace NewKnowledgeAPI.Hist.Model
+namespace NewKnowledgeAPI.History.Model
 {
 
     public class HistoryListEx

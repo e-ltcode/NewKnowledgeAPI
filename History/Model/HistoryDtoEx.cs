@@ -4,7 +4,7 @@ using NewKnowledgeAPI.Common;
 using Newtonsoft.Json;
 using System.Net;
 
-namespace NewKnowledgeAPI.Hist.Model
+namespace NewKnowledgeAPI.History.Model
 {
      public class HistoryDtoEx
     {

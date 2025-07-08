@@ -1,8 +1,8 @@
 ﻿using NewKnowledgeAPI.Common;
-using NewKnowledgeAPI.HistFilter.Model;
+using NewKnowledgeAPI.HistoryFilter.Model;
 using Newtonsoft.Json;
 
-namespace NewKnowledgeAPI.Hist.Model
+namespace NewKnowledgeAPI.HistoryFilter.Model
 {
 
     public class HistoryFilterEx

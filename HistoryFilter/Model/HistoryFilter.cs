@@ -3,7 +3,7 @@ using NewKnowledgeAPI.Common;
 using NewKnowledgeAPI.Q.Questions.Model;
 using Newtonsoft.Json;
 
-namespace NewKnowledgeAPI.HistFilter.Model
+namespace NewKnowledgeAPI.HistoryFilter.Model
 {
     public enum USER_ANSWER_ACTION { NotFixed = 0, Fixed = 1, NotClicked = 2 };
 

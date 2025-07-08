@@ -5,7 +5,7 @@ using System.Configuration;
 using Newtonsoft.Json;
 using Knowledge.Services;
 using Microsoft.AspNetCore.Authorization;
-using NewKnowledgeAPI.Hist.Model;
+using NewKnowledgeAPI.History.Model;
 using NewKnowledgeAPI.Q.Categories.Model;
 using NewKnowledgeAPI.Q.Questions.Model;
 using NewKnowledgeAPI.Q.Questions;
@@ -14,7 +14,7 @@ using NewKnowledgeAPI.A.Answers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace NewKnowledgeAPI.Hist
+namespace NewKnowledgeAPI.History
 {
     [Route("api/[controller]")]
     [ApiController]

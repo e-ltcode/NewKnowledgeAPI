@@ -1,5 +1,6 @@
 using Microsoft.Azure.Cosmos;
 using NewKnowledgeAPI.Models;
+using Knowledge.Services;
 
 namespace NewKnowledgeAPI.Services
 {
@@ -31,14 +32,12 @@ namespace NewKnowledgeAPI.Services
         /// <param name="embeddingDimension">Embedding vector dimension (default: 1536 for OpenAI ada-002).</param>
         public VectorSearchService(
             DbService dbService,
-            ILogger<VectorSearchService> logger,
-            string containerId = "EmbeddedQuestions",
-            int embeddingDimension = 1536)
+            ILogger<VectorSearchService> logger)
         {
             _dbService = dbService;
             _logger = logger;
-            _containerId = containerId;
-            _embeddingDimension = embeddingDimension;
+            _containerId = "EmbeddedQuestions";
+            _embeddingDimension = 1536; // OpenAI ada-002 embedding dimension
         }
 
         /// <summary>

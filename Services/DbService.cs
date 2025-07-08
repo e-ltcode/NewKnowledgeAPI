@@ -31,17 +31,39 @@ namespace Knowledge.Services
         public DbService(IConfiguration configuration)
         {
             Configuration = configuration;
-            CosmosDBAccountUri = configuration["CosmosDBAccountUri"];
-            CosmosDBAccountPrimaryKey = configuration["CosmosDBAccountPrimaryKey"];
+            // Try the ConnectionStrings approach first, then fallback to the old way
+            var connectionString = configuration.GetConnectionString("CosmosDb");
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                // Parse connection string format: AccountEndpoint=https://...;AccountKey=...;
+                var parts = connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                CosmosDBAccountUri = parts.FirstOrDefault(p => p.StartsWith("AccountEndpoint="))?.Replace("AccountEndpoint=", "") ?? "";
+                CosmosDBAccountPrimaryKey = parts.FirstOrDefault(p => p.StartsWith("AccountKey="))?.Replace("AccountKey=", "") ?? "";
+            }
+            else
+            {
+                // Fallback to the old configuration approach
+                CosmosDBAccountUri = configuration["CosmosDBAccountUri"] ?? "";
+                CosmosDBAccountPrimaryKey = configuration["CosmosDBAccountPrimaryKey"] ?? "";
+            }
 
-            cosmosClient = new CosmosClient(
-                CosmosDBAccountUri,
-                CosmosDBAccountPrimaryKey,
-                new CosmosClientOptions()
-                {
-                    ApplicationName = "NewKnowledgeAPI"
-                }
-            );
+            // Only create CosmosClient if configuration is provided
+            if (!string.IsNullOrEmpty(CosmosDBAccountUri) && !string.IsNullOrEmpty(CosmosDBAccountPrimaryKey))
+            {
+                cosmosClient = new CosmosClient(
+                    CosmosDBAccountUri,
+                    CosmosDBAccountPrimaryKey,
+                    new CosmosClientOptions()
+                    {
+                        ApplicationName = "NewKnowledgeAPI"
+                    }
+                );
+            }
+            else
+            {
+                // Leave cosmosClient as null - will be handled gracefully in methods
+                cosmosClient = null;
+            }
 
             Initialize = CreateInstanceAsync();
         }
@@ -171,9 +193,14 @@ namespace Knowledge.Services
 
         public async Task<Container> GetContainer(string containerId)
         {
+            if (cosmosClient == null)
+            {
+                throw new InvalidOperationException("CosmosDB is not configured. Please check your connection string in appsettings.json");
+            }
+            
             if (database == null)
             {
-                database = cosmosClient!.GetDatabase(databaseId);
+                database = cosmosClient.GetDatabase(databaseId);
                 await database.ReadAsync(); // TODO treba li ovo?
                 //    bool created = await this.CreateDatabaseIfNotExistsAsync();
                 //    if (created)

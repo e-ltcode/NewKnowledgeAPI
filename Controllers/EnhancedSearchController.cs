@@ -169,15 +169,15 @@ namespace NewKnowledgeAPI.Controllers
     // Request/Response models
     public class HybridSearchRequest
     {
-        public string Query { get; set; }
+        public string Query { get; set; } = string.Empty;
         public float? SemanticWeight { get; set; } = 0.7f;
         public int? TopK { get; set; } = 5;
     }
 
     public class FeedbackRequest
     {
-        public string Query { get; set; }
-        public string QuestionId { get; set; }
+        public string Query { get; set; } = string.Empty;
+        public string QuestionId { get; set; } = string.Empty;
         public int Position { get; set; }
         public bool Clicked { get; set; }
     }

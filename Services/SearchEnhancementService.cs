@@ -3,6 +3,7 @@ using NewKnowledgeAPI.Models;
 using NewKnowledgeAPI.Q.Questions.Model;
 using System.Security.Cryptography;
 using System.Text;
+using Knowledge.Services;
 
 namespace NewKnowledgeAPI.Services
 {
@@ -390,12 +391,12 @@ namespace NewKnowledgeAPI.Services
     // Supporting models
     public class SearchResult
     {
-        public string QuestionId { get; set; }
-        public string Title { get; set; }
-        public string Answer { get; set; }
+        public string QuestionId { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
         public double Score { get; set; }
         public SearchType SearchType { get; set; }
-        public string CategoryId { get; set; }
+        public string CategoryId { get; set; } = string.Empty;
     }
 
     public enum SearchType
@@ -407,22 +408,22 @@ namespace NewKnowledgeAPI.Services
 
     public class SearchFeedback
     {
-        public string Id { get; set; }
-        public string Query { get; set; }
-        public string QuestionId { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Query { get; set; } = string.Empty;
+        public string QuestionId { get; set; } = string.Empty;
         public int Position { get; set; }
         public bool Clicked { get; set; }
         public DateTime Timestamp { get; set; }
-        public string PartitionKey { get; set; }
+        public string PartitionKey { get; set; } = string.Empty;
     }
 
     public class QuestionSuggestion
     {
-        public string Id { get; set; }
-        public string Title { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
         public double Similarity { get; set; }
-        public string CategoryId { get; set; }
-        public string AnswerPreview { get; set; }
+        public string CategoryId { get; set; } = string.Empty;
+        public string AnswerPreview { get; set; } = string.Empty;
     }
 
     public class SearchAnalytics
@@ -430,14 +431,14 @@ namespace NewKnowledgeAPI.Services
         public int TotalSearches { get; set; }
         public int TotalClicks { get; set; }
         public double ClickThroughRate { get; set; }
-        public List<QueryStats> TopSearchQueries { get; set; }
+        public List<QueryStats> TopSearchQueries { get; set; } = new List<QueryStats>();
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
     }
 
     public class QueryStats
     {
-        public string Query { get; set; }
+        public string Query { get; set; } = string.Empty;
         public int Count { get; set; }
         public double ClickRate { get; set; }
     }
